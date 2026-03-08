@@ -29,7 +29,7 @@ go mod tidy
 ```bash
 go run cmd/cli/main.go \
   -host 192.168.1.10 -port 21 -user admin -password secret \
-  -root-path /data/ftp/photo -download-dir /home/user/Downloads/dateftp
+  -root-path /device/DCIM/PHOTOGRAPHY_PRO -download-dir /home/user/Downloads/dateftp
 ```
 
 短縮形のフラグを使用することも可能です（`-h`, `-P`, `-u`, `-p`, `-r`, `-d`）。
