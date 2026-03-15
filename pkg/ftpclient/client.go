@@ -18,6 +18,7 @@ type Config struct {
 	Password    string
 	RootPath    string
 	DownloadDir string
+	LogFunc     func(string)
 }
 
 func Download(conf Config) error {
@@ -35,10 +36,10 @@ func Download(conf Config) error {
 
 	rootBase := path.Base(conf.RootPath)
 
-	return walkAndDownload(c, conf.RootPath, conf.DownloadDir, rootBase, ".")
+	return walkAndDownload(c, conf.RootPath, conf.DownloadDir, rootBase, ".", conf.LogFunc)
 }
 
-func walkAndDownload(c *ftp.ServerConn, currentFtpDir, baseDownloadDir, rootBase, relPath string) error {
+func walkAndDownload(c *ftp.ServerConn, currentFtpDir, baseDownloadDir, rootBase, relPath string, logFunc func(string)) error {
 	entries, err := c.List(currentFtpDir)
 	if err != nil {
 		return fmt.Errorf("ディレクトリ(%s)の一覧取得に失敗しました: %w", currentFtpDir, err)
@@ -54,7 +55,7 @@ func walkAndDownload(c *ftp.ServerConn, currentFtpDir, baseDownloadDir, rootBase
 		entryRelPath := path.Join(relPath, entry.Name)
 
 		if entry.Type == ftp.EntryTypeFolder {
-			err := walkAndDownload(c, entryPath, baseDownloadDir, rootBase, entryRelPath)
+			err := walkAndDownload(c, entryPath, baseDownloadDir, rootBase, entryRelPath, logFunc)
 			if err != nil {
 				return err
 			}
@@ -86,7 +87,13 @@ func walkAndDownload(c *ftp.ServerConn, currentFtpDir, baseDownloadDir, rootBase
 				}
 			}
 
-			fmt.Printf("ダウンロード中: %s -> %s\n", entryPath, targetFilePath)
+			msg := fmt.Sprintf("ダウンロード中: %s -> %s", entryPath, targetFilePath)
+			if logFunc != nil {
+				logFunc(msg)
+			} else {
+				fmt.Println(msg)
+			}
+
 			err = downloadFile(c, entryPath, targetFilePath, ftptime)
 			if err != nil {
 				return fmt.Errorf("ファイルのダウンロードに失敗しました (%s): %w", entryPath, err)

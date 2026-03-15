@@ -1,11 +1,14 @@
 package main
 
 import (
-	"log"
+	"fmt"
+
+	"dateftp/pkg/ftpclient"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
@@ -29,7 +32,7 @@ func main() {
 	passEntry.SetPlaceHolder("例: 132934")
 
 	rootPathEntry := widget.NewEntry()
-	rootPathEntry.SetPlaceHolder("例: /DCIM/PHOTOGRAPHY_PRO")
+	rootPathEntry.SetPlaceHolder("例: /device/DCIM/PHOTOGRAPHY_PRO")
 
 	downloadDirLabel := widget.NewLabel("未選択")
 	var selectedDir string
@@ -53,6 +56,16 @@ func main() {
 		widget.NewFormItem("ルートパス", rootPathEntry),
 	)
 
+	// ログ表示用データとリスト
+	logData := binding.NewStringList()
+	logList := widget.NewListWithData(logData,
+		func() fyne.CanvasObject {
+			return widget.NewLabel("Template log line to reserve height...")
+		},
+		func(i binding.DataItem, o fyne.CanvasObject) {
+			o.(*widget.Label).Bind(i.(binding.String))
+		})
+
 	// ダウンロード実行ボタン
 	startBtn := widget.NewButton("ダウンロード開始", func() {
 		if hostEntry.Text == "" || portEntry.Text == "" || userEntry.Text == "" || passEntry.Text == "" || rootPathEntry.Text == "" || selectedDir == "" {
@@ -60,20 +73,52 @@ func main() {
 			return
 		}
 
-		log.Printf("Connecting to %s:%s as %s", hostEntry.Text, portEntry.Text, userEntry.Text)
-		log.Printf("Root path: %s", rootPathEntry.Text)
-		log.Printf("Download destination: %s", selectedDir)
+		logData.Set([]string{})
+		logData.Append("===============================")
+		logData.Append(fmt.Sprintf("Connecting to %s:%s as %s", hostEntry.Text, portEntry.Text, userEntry.Text))
+		logData.Append(fmt.Sprintf("Root path: %s", rootPathEntry.Text))
+		logData.Append(fmt.Sprintf("Download destination: %s", selectedDir))
 
-		dialog.ShowInformation("開始", "ダウンロード処理を呼び出します（連携未実装）", myWindow)
+		conf := ftpclient.Config{
+			Host:        hostEntry.Text,
+			Port:        portEntry.Text,
+			User:        userEntry.Text,
+			Password:    passEntry.Text,
+			RootPath:    rootPathEntry.Text,
+			DownloadDir: selectedDir,
+			LogFunc: func(msg string) {
+				logData.Append(msg)
+				logList.ScrollToBottom()
+			},
+		}
+
+		// UI操作の無効化（開始ボタンの連打防止などが必要な場合はここでDisableにする）
+		// ここでは簡略化のため、すぐにgoroutineで処理を開始します
+		go func() {
+			logData.Append("ダウンロード処理を開始します...")
+			err := ftpclient.Download(conf)
+			if err != nil {
+				logData.Append(fmt.Sprintf("エラー発生: %v", err))
+				dialog.ShowError(err, myWindow)
+			} else {
+				logData.Append("すべてのダウンロードが完了しました")
+				dialog.ShowInformation("完了", "すべてのダウンロードが完了しました", myWindow)
+			}
+			logList.ScrollToBottom()
+		}()
 	})
 
-	content := container.NewVBox(
+	topContent := container.NewVBox(
 		widget.NewLabel("FTPサーバー設定"),
 		form,
 		widget.NewLabel("ダウンロード先設定"),
 		container.NewHBox(dirBtn, downloadDirLabel),
 		startBtn,
+		widget.NewLabel("実行ログ:"),
 	)
+
+	// Borderコンテナを使って、リストが残りの領域（Center）を占有するようにする
+	content := container.NewBorder(topContent, nil, nil, nil, logList)
 
 	myWindow.SetContent(content)
 	myWindow.ShowAndRun()
