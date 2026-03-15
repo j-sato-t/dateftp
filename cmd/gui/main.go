@@ -13,7 +13,7 @@ import (
 func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("DateFTP")
-	myWindow.Resize(fyne.NewSize(500, 400))
+	myWindow.Resize(fyne.NewSize(1600, 900))
 
 	// 入力フィールド（PlayHolderとして例を表示）
 	hostEntry := widget.NewEntry()
@@ -27,6 +27,9 @@ func main() {
 
 	passEntry := widget.NewPasswordEntry()
 	passEntry.SetPlaceHolder("例: 132934")
+
+	rootPathEntry := widget.NewEntry()
+	rootPathEntry.SetPlaceHolder("例: /DCIM/PHOTOGRAPHY_PRO")
 
 	downloadDirLabel := widget.NewLabel("未選択")
 	var selectedDir string
@@ -47,16 +50,18 @@ func main() {
 		widget.NewFormItem("ポート番号", portEntry),
 		widget.NewFormItem("ユーザー名", userEntry),
 		widget.NewFormItem("パスワード", passEntry),
+		widget.NewFormItem("ルートパス", rootPathEntry),
 	)
 
 	// ダウンロード実行ボタン
 	startBtn := widget.NewButton("ダウンロード開始", func() {
-		if hostEntry.Text == "" || portEntry.Text == "" || userEntry.Text == "" || passEntry.Text == "" || selectedDir == "" {
-			dialog.ShowInformation("エラー", "すべての項目を入力し、ダウンロード先を選択してください。", myWindow)
+		if hostEntry.Text == "" || portEntry.Text == "" || userEntry.Text == "" || passEntry.Text == "" || rootPathEntry.Text == "" || selectedDir == "" {
+			dialog.ShowInformation("エラー", "すべての項目を入力してください。", myWindow)
 			return
 		}
 
 		log.Printf("Connecting to %s:%s as %s", hostEntry.Text, portEntry.Text, userEntry.Text)
+		log.Printf("Root path: %s", rootPathEntry.Text)
 		log.Printf("Download destination: %s", selectedDir)
 
 		dialog.ShowInformation("開始", "ダウンロード処理を呼び出します（連携未実装）", myWindow)

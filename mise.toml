@@ -1,3 +1,6 @@
 [tools]
 go = "latest"
 "go:github.com/fyne-io/fyne-cross" = "latest"
+
+[env]
+CGO_ENABLED = "1"
