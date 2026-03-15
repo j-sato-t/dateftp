@@ -14,28 +14,38 @@ import (
 )
 
 func main() {
-	myApp := app.New()
+	myApp := app.NewWithID("com.github.dateftp.j-sato-t")
 	myWindow := myApp.NewWindow("DateFTP")
 	myWindow.Resize(fyne.NewSize(1600, 900))
+
+	prefs := myApp.Preferences()
 
 	// 入力フィールド（PlayHolderとして例を表示）
 	hostEntry := widget.NewEntry()
 	hostEntry.SetPlaceHolder("例: 192.168.3.2")
+	hostEntry.SetText(prefs.StringWithFallback("host", ""))
 
 	portEntry := widget.NewEntry()
 	portEntry.SetPlaceHolder("例: 4006")
+	portEntry.SetText(prefs.StringWithFallback("port", ""))
 
 	userEntry := widget.NewEntry()
 	userEntry.SetPlaceHolder("例: pc")
+	userEntry.SetText(prefs.StringWithFallback("user", ""))
 
 	passEntry := widget.NewPasswordEntry()
 	passEntry.SetPlaceHolder("例: 132934")
 
 	rootPathEntry := widget.NewEntry()
 	rootPathEntry.SetPlaceHolder("例: /device/DCIM/PHOTOGRAPHY_PRO")
+	rootPathEntry.SetText(prefs.StringWithFallback("rootPath", ""))
 
-	downloadDirLabel := widget.NewLabel("未選択")
-	var selectedDir string
+	selectedDir := prefs.StringWithFallback("downloadDir", "")
+	downloadDirLabelText := "未選択"
+	if selectedDir != "" {
+		downloadDirLabelText = selectedDir
+	}
+	downloadDirLabel := widget.NewLabel(downloadDirLabelText)
 
 	// ディレクトリ選択用ボタン
 	dirBtn := widget.NewButton("ダウンロード先を選択", func() {
@@ -72,6 +82,13 @@ func main() {
 			dialog.ShowInformation("エラー", "すべての項目を入力してください。", myWindow)
 			return
 		}
+
+		// 設定の保存
+		prefs.SetString("host", hostEntry.Text)
+		prefs.SetString("port", portEntry.Text)
+		prefs.SetString("user", userEntry.Text)
+		prefs.SetString("rootPath", rootPathEntry.Text)
+		prefs.SetString("downloadDir", selectedDir)
 
 		logData.Set([]string{})
 		logData.Append("===============================")
