@@ -17,7 +17,7 @@ This tool was created via **Vibe Coding**.
 You can install the CLI tool using the `go install` command. By running the following command, the `dateftp` command will become available.
 
 ```bash
-go install github.com/j-sato-t/dateftp
+go install github.com/j-sato-t/dateftp/cmd/dateftp@cmd/dateftp/v1.0.0
 ```
 *Note: Go must be installed. Make sure that your `GOPATH/bin` (default is `~/go/bin` or `%USERPROFILE%\go\bin`) is added to your environment's `PATH`.*
 
