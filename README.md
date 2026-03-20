@@ -1,52 +1,87 @@
-# dateftp
-ftp download and sort of date
+# DateFTP
 
-CLIで操作するFTPクライアントです。FTPサーバー上のファイルをダウンロードし、ファイルのタイムスタンプに基づいて「YYYY/MM/DD」形式のディレクトリ構造でローカルに保存します。
+[日本語版の README はこちら (Japanese README)](./README-ja.md)
 
-## 主な機能
-- FTPサーバーからのファイルの再帰的ダウンロード
-- ダウンロードしたファイルのタイムスタンプに基づいた年/月/日のディレクトリ自動生成
-- ローカルに同名ファイルが既に存在する場合、タイムスタンプを比較して新しい場合のみダウンロードをスキップ
-- `github.com/spf13/pflag` を用いた短縮形フラグでの柔軟な実行設定
-- 環境変数でのパラメータのフォールバック対応
+DateFTP is a tool for downloading files from an FTP server in bulk, automatically organizing them into subdirectories based on the modification dates of the files.
+This tool was created via **Vibe Coding**.
 
-## 環境構築
-- Go 1.23.0以上（`mise`による環境構築を推奨）
+## Features
 
-## インストールと依存関係の解決
-リポジトリをクローン後、以下のコマンドで依存関係を解決してください。
+- Creates subdirectories based on file modification file dates and downloads files into them
+- Provides both CLI and GUI interfaces
 
-```bash
-go mod tidy
-```
+## CLI Version (`dateftp`)
 
-## 使用方法
+### Installation
 
-フラグか環境変数を用いて接続先とダウンロード先を指定し、CLIツールを実行します。（フラグの指定が優先されます）
-
-### フラグで指定して実行する例
+You can install the CLI tool using the `go install` command. By running the following command, the `dateftp` command will become available.
 
 ```bash
-go run cmd/cli/main.go \
-  -host 192.168.1.10 -port 21 -user admin -password secret \
-  -root-path /device/DCIM/PHOTOGRAPHY_PRO -download-dir /home/user/Downloads/dateftp
+go install github.com/j-sato-t/dateftp
 ```
+*Note: Go must be installed. Make sure that your `GOPATH/bin` (default is `~/go/bin` or `%USERPROFILE%\go\bin`) is added to your environment's `PATH`.*
 
-短縮形のフラグを使用することも可能です（`-h`, `-P`, `-u`, `-p`, `-r`, `-d`）。
+### Usage
 
-### 環境変数を指定して実行する例
+`dateftp` can accept configurations using command-line arguments (flags) or environment variables.
 
-あらかじめ環境変数をセットしておいた後、以下のように引数なしで実行できます。
+#### Executing with Flags
 
 ```bash
-export FTP_HOST=192.168.1.10
-export FTP_PORT=21
-export FTP_USER=admin
-export FTP_PASSWORD=secret
-export FTP_ROOT_PATH=/data/ftp/photo
-export FTP_DOWNLOAD_DIR=/home/user/Downloads/dateftp
-
-go run cmd/cli/main.go
+dateftp --host "192.168.1.100" \
+        --port "21" \
+        --user "ftpuser" \
+        --password "ftppass" \
+        --root-path "/path/to/remote/dir" \
+        --download-dir "./downloads"
 ```
 
-※ `-download-dir` と `FTP_DOWNLOAD_DIR` が指定されない場合は、自動でカレントディレクトリにダウンロードディレクトリが作成されます。
+The available flags are as follows:
+- `-h, --host`: FTP host (required)
+- `-P, --port`: FTP port (required)
+- `-u, --user`: FTP user (required)
+- `-p, --password`: FTP password (required)
+- `-r, --root-path`: FTP root path (required)
+- `-d, --download-dir`: Download destination directory (defaults to the current directory if omitted)
+
+#### Executing with Environment Variables
+
+You can also run it after exporting environment variables. If both flags and environment variables are present, the flags will take precedence.
+
+```bash
+export FTP_HOST="192.168.1.100"
+export FTP_PORT="21"
+export FTP_USER="ftpuser"
+export FTP_PASSWORD="ftppass"
+export FTP_ROOT_PATH="/path/to/remote/dir"
+export FTP_DOWNLOAD_DIR="./downloads"
+
+dateftp
+```
+
+## GUI Version (`dateftp-gui`)
+
+By using the GUI version, you can enter settings from an intuitive screen and execute downloads. It also features a convenient execution log display.
+
+### Build and Run
+
+Since it uses Fyne, the necessary dependencies must be installed on your system (e.g., C compiler on Windows).
+You can build or run it from the root of the repository with the following commands:
+
+```bash
+# Run
+go run ./cmd/dateftp-gui
+
+# Build
+go build -o dateftp-gui ./cmd/dateftp-gui
+```
+
+### About Saving Input Data
+
+In the GUI version, the inputs for "Host name", "Port number", "User name", "Root path", and "Download destination" are automatically saved and restored on the next startup. (*For security reasons, the password is not saved*)
+
+**Examples of Save Locations:**
+Settings are saved using the OS's built-in preferences mechanism (Fyne's Preferences feature).
+- Windows: `C:\Users\<Username>\AppData\Roaming\com.github.dateftp.j-sato-t\preferences.json`
+- macOS: `~/Library/Preferences/com.github.dateftp.j-sato-t/preferences.json`
+- Linux: `~/.config/com.github.dateftp.j-sato-t/preferences.json`
