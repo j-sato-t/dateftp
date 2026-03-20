@@ -15,7 +15,7 @@ DateFTP は、FTPサーバーからファイルの更新日時を基準にディ
 `go install` コマンドを使用してCLIツールをインストールできます。以下のコマンドを実行することで、 `dateftp` コマンドが利用可能になります。
 
 ```bash
-go install github.com/j-sato-t/dateftp
+go install github.com/j-sato-t/dateftp/cmd/dateftp@cmd/dateftp/v1.0.0
 ```
 ※ 実行にはGoがインストールされており、リポジトリのルートディレクトリで実行している必要があります。環境変数 `GOPATH/bin`（デフォルトは `~/go/bin` または `%USERPROFILE%\go\bin`）にパスが通っていることを確認してください。
 
