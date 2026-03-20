@@ -7,7 +7,7 @@ import (
 
 	flag "github.com/spf13/pflag"
 
-	"dateftp/pkg/ftpclient"
+	"github.com/j-sato-t/dateftp/pkg/ftpclient"
 )
 
 func main() {

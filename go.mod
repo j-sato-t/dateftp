@@ -1,4 +1,4 @@
-module dateftp
+module github.com/j-sato-t/dateftp
 
 go 1.23.0
 

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"dateftp/pkg/ftpclient"
+	"github.com/j-sato-t/dateftp/pkg/ftpclient"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
