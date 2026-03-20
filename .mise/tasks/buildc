@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# mise description="CLI版のビルド"
+# mise alias="buildc"
+
+go build -o dateftp ./cmd/dateftp

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# mise description="GUI版のビルド"
+# mise alias="buildg"
+
+go build -o dateftp-gui ./cmd/dateftp-gui
