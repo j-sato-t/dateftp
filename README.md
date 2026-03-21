@@ -5,9 +5,15 @@
 DateFTP is a tool for downloading files from an FTP server in bulk, automatically organizing them into subdirectories based on the modification dates of the files.
 This tool was created via **Vibe Coding**.
 
+## Purpose
+
+- An FTP downloader designed for cases where **a large number of similar files exist in the same directory**, such as smartphone photos or game screenshots.
+- It assumes the use of a filer app or similar tool that exposes a smartphone to the LAN as an FTP server.
+
 ## Features
 
-- Creates subdirectories based on file modification file dates and downloads files into them
+- Creates subdirectories based on file modification dates and downloads files into them
+  - Example: 20260321_123456_001.jpg → 2026/03/21/20260321_123456_001.jpg
 - Provides both CLI and GUI interfaces
 
 ## CLI Version (`dateftp`)
