@@ -76,8 +76,15 @@ func main() {
 			o.(*widget.Label).Bind(i.(binding.String))
 		})
 
+	logLabel := widget.NewLabel("実行ログ:")
+	logLabel.Hide()
+	logList.Hide()
+
 	// ダウンロード実行ボタン
 	startBtn := widget.NewButton("ダウンロード開始", func() {
+		logLabel.Show()
+		logList.Show()
+
 		if hostEntry.Text == "" || portEntry.Text == "" || userEntry.Text == "" || passEntry.Text == "" || rootPathEntry.Text == "" || selectedDir == "" {
 			dialog.ShowInformation("エラー", "すべての項目を入力してください。", myWindow)
 			return
@@ -104,24 +111,29 @@ func main() {
 			RootPath:    rootPathEntry.Text,
 			DownloadDir: selectedDir,
 			LogFunc: func(msg string) {
-				logData.Append(msg)
-				logList.ScrollToBottom()
+				fyne.Do(func() {
+					logData.Append(msg)
+					logList.ScrollToBottom()
+				})
 			},
 		}
 
 		// UI操作の無効化（開始ボタンの連打防止などが必要な場合はここでDisableにする）
 		// ここでは簡略化のため、すぐにgoroutineで処理を開始します
 		go func() {
-			logData.Append("ダウンロード処理を開始します...")
+			fyne.Do(func() { logData.Append("ダウンロード処理を開始します...") })
 			err := ftpclient.Download(conf)
-			if err != nil {
-				logData.Append(fmt.Sprintf("エラー発生: %v", err))
-				dialog.ShowError(err, myWindow)
-			} else {
-				logData.Append("すべてのダウンロードが完了しました")
-				dialog.ShowInformation("完了", "すべてのダウンロードが完了しました", myWindow)
-			}
-			logList.ScrollToBottom()
+			
+			fyne.Do(func() {
+				if err != nil {
+					logData.Append(fmt.Sprintf("エラー発生: %v", err))
+					dialog.ShowError(err, myWindow)
+				} else {
+					logData.Append("すべてのダウンロードが完了しました")
+					dialog.ShowInformation("完了", "すべてのダウンロードが完了しました", myWindow)
+				}
+				logList.ScrollToBottom()
+			})
 		}()
 	})
 
@@ -131,7 +143,7 @@ func main() {
 		widget.NewLabel("ダウンロード先設定"),
 		container.NewHBox(dirBtn, downloadDirLabel),
 		startBtn,
-		widget.NewLabel("実行ログ:"),
+		logLabel,
 	)
 
 	// Borderコンテナを使って、リストが残りの領域（Center）を占有するようにする
