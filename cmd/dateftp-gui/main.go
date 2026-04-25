@@ -76,8 +76,15 @@ func main() {
 			o.(*widget.Label).Bind(i.(binding.String))
 		})
 
+	logLabel := widget.NewLabel("実行ログ:")
+	logLabel.Hide()
+	logList.Hide()
+
 	// ダウンロード実行ボタン
 	startBtn := widget.NewButton("ダウンロード開始", func() {
+		logLabel.Show()
+		logList.Show()
+
 		if hostEntry.Text == "" || portEntry.Text == "" || userEntry.Text == "" || passEntry.Text == "" || rootPathEntry.Text == "" || selectedDir == "" {
 			dialog.ShowInformation("エラー", "すべての項目を入力してください。", myWindow)
 			return
@@ -136,7 +143,7 @@ func main() {
 		widget.NewLabel("ダウンロード先設定"),
 		container.NewHBox(dirBtn, downloadDirLabel),
 		startBtn,
-		widget.NewLabel("実行ログ:"),
+		logLabel,
 	)
 
 	// Borderコンテナを使って、リストが残りの領域（Center）を占有するようにする
