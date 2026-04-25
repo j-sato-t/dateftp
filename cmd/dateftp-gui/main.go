@@ -104,24 +104,29 @@ func main() {
 			RootPath:    rootPathEntry.Text,
 			DownloadDir: selectedDir,
 			LogFunc: func(msg string) {
-				logData.Append(msg)
-				logList.ScrollToBottom()
+				fyne.Do(func() {
+					logData.Append(msg)
+					logList.ScrollToBottom()
+				})
 			},
 		}
 
 		// UI操作の無効化（開始ボタンの連打防止などが必要な場合はここでDisableにする）
 		// ここでは簡略化のため、すぐにgoroutineで処理を開始します
 		go func() {
-			logData.Append("ダウンロード処理を開始します...")
+			fyne.Do(func() { logData.Append("ダウンロード処理を開始します...") })
 			err := ftpclient.Download(conf)
-			if err != nil {
-				logData.Append(fmt.Sprintf("エラー発生: %v", err))
-				dialog.ShowError(err, myWindow)
-			} else {
-				logData.Append("すべてのダウンロードが完了しました")
-				dialog.ShowInformation("完了", "すべてのダウンロードが完了しました", myWindow)
-			}
-			logList.ScrollToBottom()
+			
+			fyne.Do(func() {
+				if err != nil {
+					logData.Append(fmt.Sprintf("エラー発生: %v", err))
+					dialog.ShowError(err, myWindow)
+				} else {
+					logData.Append("すべてのダウンロードが完了しました")
+					dialog.ShowInformation("完了", "すべてのダウンロードが完了しました", myWindow)
+				}
+				logList.ScrollToBottom()
+			})
 		}()
 	})
 
