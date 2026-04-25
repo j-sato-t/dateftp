@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jlaffaye/ftp"
@@ -19,6 +20,26 @@ type Config struct {
 	RootPath    string
 	DownloadDir string
 	LogFunc     func(string)
+}
+
+var fileNameReplaceMap = map[string]string{
+	"\\": "_backslash_",
+	"/":  "_slash_",
+	":":  "_colon_",
+	"*":  "_asterisk_",
+	"?":  "_question_",
+	"\"": "_quote_",
+	"<":  "_lt_",
+	">":  "_gt_",
+	"|":  "_pipe_",
+	"@":  "_at_",
+}
+
+func sanitizeFileName(name string) string {
+	for old, newStr := range fileNameReplaceMap {
+		name = strings.ReplaceAll(name, old, newStr)
+	}
+	return name
 }
 
 func Download(conf Config) error {
@@ -77,7 +98,8 @@ func walkAndDownload(c *ftp.ServerConn, currentFtpDir, baseDownloadDir, rootBase
 				return fmt.Errorf("ディレクトリ作成に失敗しました (%s): %w", targetDir, err)
 			}
 
-			targetFilePath := filepath.Join(targetDir, entry.Name)
+			safeFileName := sanitizeFileName(entry.Name)
+			targetFilePath := filepath.Join(targetDir, safeFileName)
 
 			stat, err := os.Stat(targetFilePath)
 			if err == nil {
